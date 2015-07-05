@@ -45,8 +45,8 @@ public class MemoryDemo {
         return Long.parseLong(processName.split("@")[0]);
     }
 
-    public void demo(boolean manualGc, boolean objectActivity) throws InterruptedException, IOException {
-        Thread t = new Thread(new MemoryPrinter());
+    public void demo(String args[], boolean gcOnce, boolean manualGc, boolean objectActivity) throws InterruptedException, IOException {
+        Thread t = new Thread(new MemoryPrinter(args));
         t.start();
 
         for (int i = 0; i < MB_SIZE; i++) {
@@ -62,6 +62,10 @@ public class MemoryDemo {
         System.out.println("Done:  allocated " + MB_SIZE + "MB");
 
         myBlob = null;
+        
+        if (gcOnce) {
+            System.out.println("Doing ONE manual GC");
+        }
 
         // 50MB of base usage in all cases...
         myActivityBlob.clear();
@@ -91,15 +95,22 @@ public class MemoryDemo {
     public static void main(String[] args) throws InterruptedException, IOException {
         boolean manualGc = false;
         boolean objectActivity = false;
+        boolean gcOnce = false;
         for (String arg : args) {
-            if (arg.equals("--manual_gc")) {
-                manualGc = true;
-            } else if (arg.equals("--object_activity")) {
-                objectActivity = true;
+            switch (arg) {
+                case "--manual_gc":
+                    manualGc = true;
+                    break;
+                case "--object_activity":
+                    objectActivity = true;
+                    break;
+                case "--gc_once":
+                    gcOnce = true;
+                    break;
             }
         }
         MemoryDemo md = new MemoryDemo();
-        md.demo(manualGc, objectActivity);
+        md.demo(args, gcOnce, manualGc, objectActivity);
     }
 
     class MemoryPrinter implements Runnable {
@@ -108,7 +119,13 @@ public class MemoryDemo {
         private int interval = 1;
         private PrintWriter pw;
         private int mb = 1048576;
-
+        private String[] args;
+        
+        private MemoryPrinter() {}
+        public MemoryPrinter(String[] args) {
+            this.args = args;
+        }
+        
         private void header() {
             RuntimeMXBean runtimeMxBean = ManagementFactory.getRuntimeMXBean();
             List<String> arguments = runtimeMxBean.getInputArguments();
@@ -117,9 +134,20 @@ public class MemoryDemo {
                 pw.print(arg);
                 pw.print(" ");
             }
+            if (args.length > 0) {
+                pw.print(" Program arguments:  ");
+                for (String arg: args) {
+                    pw.print(arg);
+                    pw.print(" ");
+                }
+            }
             pw.println();
             pw.println();
             pw.println("used memory, free memory, total memory, xmx");
+        }
+        
+        public void setArgs(String[] args) {
+            this.args = args;
         }
 
         @Override
