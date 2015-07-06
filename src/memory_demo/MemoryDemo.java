@@ -77,7 +77,7 @@ public class MemoryDemo {
             System.out.println("Starting background object activity");
         }
         while (true) {
-            Thread.sleep(100);
+            Thread.sleep(10);
 
             
             // this line actually makes a huge difference to garbage collection 
@@ -91,7 +91,7 @@ public class MemoryDemo {
 
             if (objectActivity) {
                 myActivityBlob.clear();
-                for (int i = 0; i < 512; i++) {
+                for (int i = 0; i < 100; i++) {
                     myActivityBlob.add(generateString(MB));
                 }
             }

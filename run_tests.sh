@@ -34,9 +34,9 @@ function run_with_args() {
   echo "---------- completed -----------"
 }
 
-run_with_args "normal" " " "2h"
-run_with_args "gc_once" "--gc_once" "1h"
-run_with_args "manual_gc" "--manual_gc" "30m"
+run_with_args "normal" " " "3h"
+run_with_args "gc_once" "--gc_once" "2h"
+run_with_args "manual_gc" "--manual_gc" "1h"
 run_with_args "object_activity" "--object_activity" "2h"
 run_with_args "manual_gc_and_activity" "--manual_gc --:object_activity" "1h"
 run_with_args "gc_once_and_activity" "--gc_once --object_activity" "1h"
