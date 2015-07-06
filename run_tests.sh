@@ -14,7 +14,7 @@ function run_with_args() {
   cd $TEST_NAME 
  
   for GC in ' ' '-XX:+UseSerialGC' '-XX:+UseParallelGC' '-XX:+UseConcMarkSweepGC' '-XX:+UseG1GC' ; do
-    java -cp ../../build/classes $GC -Xmx10g memory_demo.MemoryDemo $TEST_ARGS > /dev/null &
+    java -cp ../../build/classes $GC -Xmx7g memory_demo.MemoryDemo $TEST_ARGS > /dev/null &
     echo $! >> pids.txt
   done
   sleep $TEST_LENGTH
@@ -35,8 +35,8 @@ function run_with_args() {
 }
 
 run_with_args "normal" " " "2h"
-run_with_args "gc_once" "--gc_once" "30m"
+run_with_args "gc_once" "--gc_once" "1h"
 run_with_args "manual_gc" "--manual_gc" "30m"
-run_with_args "object_activity" "--object_activity" "30m"
-run_with_args "manual_gc_and_activity" "--manual_gc --object_activity" "30m"
-
+run_with_args "object_activity" "--object_activity" "2h"
+run_with_args "manual_gc_and_activity" "--manual_gc --:object_activity" "1h"
+run_with_args "gc_once_and_activity" "--gc_once --object_activity" "1h"

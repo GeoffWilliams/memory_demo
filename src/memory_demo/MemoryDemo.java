@@ -26,10 +26,10 @@ public class MemoryDemo {
 
     private static final Random random = new Random();
 
-    private static ArrayList<String> myBlob = new ArrayList<>();
-    private static ArrayList<String> myActivityBlob = new ArrayList<>();
+    private ArrayList<String> myBlob = new ArrayList<>();
+    private ArrayList<String> myActivityBlob = new ArrayList<>();
 
-    public static String generateString(int len) {
+    public String generateString(int len) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < len; i++) {
             char c = (char) (random.nextInt(UPPER_BOUND - LOWER_BOUND) + LOWER_BOUND);
@@ -51,7 +51,6 @@ public class MemoryDemo {
 
         for (int i = 0; i < MB_SIZE; i++) {
             myBlob.add(generateString(MB));
-            System.out.println("allocated: " + (i + 1) + "MB");
         }
 
         if (manualGc) {
@@ -65,6 +64,7 @@ public class MemoryDemo {
         
         if (gcOnce) {
             System.out.println("Doing ONE manual GC");
+            System.gc();
         }
 
         // 50MB of base usage in all cases...
@@ -79,8 +79,15 @@ public class MemoryDemo {
         while (true) {
             Thread.sleep(100);
 
-            String blah = myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1))
-                    + myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
+            
+            // this line actually makes a huge difference to garbage collection 
+            // try commenting it out and see what happens... basically if there
+            // is no underlying activity in the VM then the garbage collector 
+            // doesn't bother to do anything - even if its sitting on a ton of
+            // memory.  This goes for G1GC too - it's a very self-centered view
+            // of the world ;-)
+            String blah = myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
+            //        + myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
 
             if (objectActivity) {
                 myActivityBlob.clear();
@@ -118,7 +125,6 @@ public class MemoryDemo {
         private boolean running = true;
         private int interval = 1;
         private PrintWriter pw;
-        private int mb = 1048576;
         private String[] args;
         
         private MemoryPrinter() {}
@@ -143,7 +149,7 @@ public class MemoryDemo {
             }
             pw.println();
             pw.println();
-            pw.println("used memory, free memory, total memory, xmx");
+            pw.println("used memory, total memory, maximum memory");
         }
         
         public void setArgs(String[] args) {
@@ -156,11 +162,11 @@ public class MemoryDemo {
                 pw = new PrintWriter(getPID() + "_memlog.txt");
                 header();
                 while (running) {
-                    long usedMem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / mb;
-                    long freeMem = Runtime.getRuntime().freeMemory() / mb;
-                    long totalMem = Runtime.getRuntime().totalMemory() / mb;
-                    long xmx = Runtime.getRuntime().maxMemory() / mb;
-                    String csv = usedMem + "," + freeMem + "," + totalMem + "," + xmx;
+                    long usedMem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / MB;
+                    long freeMem = Runtime.getRuntime().freeMemory() / MB;
+                    long totalMem = Runtime.getRuntime().totalMemory() / MB;
+                    long maxMemory = Runtime.getRuntime().maxMemory() / MB;
+                    String csv = usedMem + "," + totalMem + "," + maxMemory;
                     pw.println(csv);
                     pw.flush();
                     Thread.sleep(interval * 1000);
