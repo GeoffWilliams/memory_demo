@@ -77,7 +77,7 @@ public class MemoryDemo {
             System.out.println("Starting background object activity");
         }
         while (true) {
-            Thread.sleep(10);
+            Thread.sleep(1000);
 
             
             // this line actually makes a huge difference to garbage collection 
@@ -86,8 +86,8 @@ public class MemoryDemo {
             // doesn't bother to do anything - even if its sitting on a ton of
             // memory.  This goes for G1GC too - it's a very self-centered view
             // of the world ;-)
-            String blah = myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
-            //        + myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
+            String blah = myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1))
+                          + myActivityBlob.get(random.nextInt(myActivityBlob.size() - 1));
 
             if (objectActivity) {
                 myActivityBlob.clear();
